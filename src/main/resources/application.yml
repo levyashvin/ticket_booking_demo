@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ticket-booking-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketdb
+    username: admin
+    password: password123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # temporary to avoid being locked out
+  security:
+    user:
+      name: dev
+      password: dev
