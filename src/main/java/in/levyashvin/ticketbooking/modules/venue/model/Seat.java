@@ -29,7 +29,7 @@ public class Seat {
     private Long id;
 
     private String rowChar;
-    private String seatNumber;
+    private int seatNumber;
 
     @Enumerated(EnumType.STRING)
     private SeatType type;
