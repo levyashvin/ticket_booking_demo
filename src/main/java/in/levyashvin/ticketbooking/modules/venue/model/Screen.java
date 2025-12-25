@@ -1,6 +1,10 @@
 package in.levyashvin.ticketbooking.modules.venue.model;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +39,10 @@ public class Screen {
 
     @ManyToOne
     @JoinColumn(name = "theatre_id")
+    @JsonBackReference
     private Theater theater;
 
     @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Seat> seats;
 }

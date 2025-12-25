@@ -1,5 +1,7 @@
 package in.levyashvin.ticketbooking.modules.venue.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,5 +38,6 @@ public class Seat {
 
     @ManyToOne
     @JoinColumn(name = "screen")
+    @JsonBackReference
     private Screen screen;
 }
