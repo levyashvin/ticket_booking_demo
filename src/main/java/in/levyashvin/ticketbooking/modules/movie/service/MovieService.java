@@ -56,19 +56,26 @@ public class MovieService {
                 .build();
         Show savedShow = showRepository.save(show);
 
-        // We iterate over the PHYSICAL seats of the screen
         List<ShowSeat> showSeats = new ArrayList<>();
         
-        for (Seat seat : screen.getSeats()) {
+        for(Seat seat : screen.getSeats()) {
+            double ticketPrice;
+            
+            // Determine price based on seat type
+            if(seat.getType().name().equals("PREMIUM"))
+                ticketPrice = request.getPremiumPrice();
+            else
+                ticketPrice = request.getRegularPrice();
+
             ShowSeat showSeat = ShowSeat.builder()
                     .show(savedShow)
                     .seat(seat) // Link to physical seat
                     .status(ShowSeatStatus.AVAILABLE)
-                    .price(request.getPrice()) // Set price
+                    .price(ticketPrice)
                     .build();
             showSeats.add(showSeat);
         }
-
+        
         showSeatRepository.saveAll(showSeats);
 
         return savedShow;

@@ -8,5 +8,7 @@ public class CreateShowRequest {
     private Long movieId;
     private Long screenId;
     private LocalDateTime startTime;
-    private double price; // Base price for all seats in this show
+    // Split the price into tiers Premium and Regular
+    private double premiumPrice;
+    private double regularPrice;
 }
