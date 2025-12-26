@@ -2,6 +2,7 @@ package in.levyashvin.ticketbooking.modules.movie.service;
 
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateMovieRequest;
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateShowRequest;
+import in.levyashvin.ticketbooking.modules.movie.dto.ShowSeatResponse;
 import in.levyashvin.ticketbooking.modules.movie.model.Movie;
 import in.levyashvin.ticketbooking.modules.movie.model.Show;
 import in.levyashvin.ticketbooking.modules.movie.model.ShowSeat;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,5 +81,31 @@ public class MovieService {
         showSeatRepository.saveAll(showSeats);
 
         return savedShow;
+    }
+
+    public List<Movie> getAllMovies() {
+        return movieRepository.findAll();
+    }
+
+    public List<Show> getShowsByMovie(Long movieId) {
+        Movie movie = movieRepository.findById(movieId)
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        return showRepository.findByMovie(movie);
+    }
+
+    public List<ShowSeatResponse> getShowSeats(Long showId) {
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() -> new RuntimeException("Show not found"));
+
+        return showSeatRepository.findByShow(show).stream()
+                .map(showSeat -> ShowSeatResponse.builder()
+                        .id(showSeat.getId())
+                        .row(showSeat.getSeat().getRowChar())
+                        .number(showSeat.getSeat().getSeatNumber())
+                        .price(showSeat.getPrice())
+                        .status(showSeat.getStatus())
+                        .type(showSeat.getSeat().getType().name())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
