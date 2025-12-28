@@ -14,6 +14,9 @@ import in.levyashvin.ticketbooking.modules.venue.model.Screen;
 import in.levyashvin.ticketbooking.modules.venue.model.Seat;
 import in.levyashvin.ticketbooking.modules.venue.repository.ScreenRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,7 @@ public class MovieService {
     private final ShowSeatRepository showSeatRepository;
     private final ScreenRepository screenRepository;
 
+    @CacheEvict(value = "movies", allEntries = true)
     public Movie addMovie(CreateMovieRequest request) {
         Movie movie = Movie.builder()
                 .title(request.getTitle())
@@ -42,6 +46,7 @@ public class MovieService {
     }
 
     @Transactional // Ensures all seats are created or none at all atomic operation
+    @CacheEvict(value = "shows", key = "request.movieId")
     public Show createShow(CreateShowRequest request) {
         
         Movie movie = movieRepository.findById(request.getMovieId())
@@ -83,10 +88,12 @@ public class MovieService {
         return savedShow;
     }
 
+    @Cacheable(value = "movies")
     public List<Movie> getAllMovies() {
         return movieRepository.findAll();
     }
 
+    @Cacheable(value = "shows", key = "#movieId")
     public List<Show> getShowsByMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                         .orElseThrow(() -> new RuntimeException("Movie not found"));
