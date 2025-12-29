@@ -30,5 +30,15 @@ services:
     ports:
       - "6379:6379"
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ticket_booking_rabbitmq
+    ports:
+      - "5672:56712"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      
 volumes:
   postgres_data:
