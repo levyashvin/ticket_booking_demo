@@ -3,8 +3,11 @@ package in.levyashvin.ticketbooking.modules.booking.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import in.levyashvin.ticketbooking.config.RabbitMQConfig;
+import in.levyashvin.ticketbooking.modules.booking.dto.BookingConfirmationEvent;
 import in.levyashvin.ticketbooking.modules.booking.dto.BookingRequest;
 import in.levyashvin.ticketbooking.modules.booking.dto.BookingResponse;
 import in.levyashvin.ticketbooking.modules.booking.model.Booking;
@@ -28,6 +31,8 @@ public class BookingService {
     private final ShowRepository showRepository;
     private final ShowSeatRepository showSeatRepository;
     private final UserRepository userRepository;
+
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public BookingResponse bookTickets(BookingRequest request, String userEmail){
@@ -70,6 +75,20 @@ public class BookingService {
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
+
+        // RabbitMQ publish event
+        BookingConfirmationEvent event = BookingConfirmationEvent.builder()
+                .userEmail(userEmail)
+                .bookingId(savedBooking.getId())
+                .movieTitle(show.getMovie().getTitle())
+                .amount(savedBooking.getTotalAmount())
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.ROUTING_KEY,
+                event
+        );
 
         return BookingResponse.builder()
                 .bookingId(savedBooking.getId())
