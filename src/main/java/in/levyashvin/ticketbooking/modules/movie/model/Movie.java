@@ -28,5 +28,5 @@ public class Movie {
     private String genre;
     private int durationMinutes;
     private String language;
-    private LocalDate releasDate;
+    private LocalDate releaseDate;
 }

@@ -40,7 +40,7 @@ public class MovieService {
                 .genre(request.getGenre())
                 .durationMinutes(request.getDurationMinutes())
                 .language(request.getLanguage())
-                .releasDate(request.getReleaseDate())
+                .releaseDate(request.getReleaseDate())
                 .build();
         return movieRepository.save(movie);
     }
