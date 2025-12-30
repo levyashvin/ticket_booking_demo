@@ -1,6 +1,8 @@
 package in.levyashvin.ticketbooking;
 
 import in.levyashvin.ticketbooking.modules.booking.dto.BookingRequest;
+import in.levyashvin.ticketbooking.modules.venue.repository.CityRepository;
+import in.levyashvin.ticketbooking.modules.venue.repository.TheaterRepository;
 import in.levyashvin.ticketbooking.modules.movie.model.Movie;
 import in.levyashvin.ticketbooking.modules.movie.model.Show;
 import in.levyashvin.ticketbooking.modules.movie.repository.MovieRepository;
@@ -39,6 +41,8 @@ public class BookingFlowTest extends BaseIntegrationTest {
     @Autowired private SeatRepository seatRepository;
     @Autowired private ShowRepository showRepository;
     @Autowired private ShowSeatRepository showSeatRepository;
+    @Autowired private CityRepository cityRepository;
+    @Autowired private TheaterRepository theaterRepository;
     
     @MockitoBean
     private RabbitTemplate rabbitTemplate; // Mock RabbitMQ to avoid errors
@@ -52,12 +56,24 @@ public class BookingFlowTest extends BaseIntegrationTest {
         RestAssured.port = port;
 
         // 1. Create User & Get Token
-        var authResponse = authService.register(new RegisterRequest("Test User", "test@test.com", "pass123"));
+        String uniqueEmail = "test" + System.currentTimeMillis() + "@test.com";
+        var authResponse = authService.register(new RegisterRequest("Test User", uniqueEmail, "pass123"));
         userToken = authResponse.getToken();
 
-        // 2. Setup Data (Screen, Seat, Movie, Show)
-        Screen screen = screenRepository.save(Screen.builder().name("Screen 1").build());
+        // 2. Setup Full Venue Hierarchy (City -> Theater -> Screen)
+        var city = cityRepository.save(in.levyashvin.ticketbooking.modules.venue.model.City.builder().name("Test City").build());
         
+        var theater = theaterRepository.save(in.levyashvin.ticketbooking.modules.venue.model.Theater.builder()
+                .name("Grand Cinema")
+                .address("Downtown")
+                .city(city)
+                .build());
+        
+        Screen screen = screenRepository.save(Screen.builder()
+                .name("Screen 1")
+                .theater(theater)
+                .build());
+
         Seat seat = Seat.builder().rowChar("A").seatNumber(1).type(SeatType.REGULAR).screen(screen).build();
         seatRepository.save(seat);
 
@@ -67,17 +83,17 @@ public class BookingFlowTest extends BaseIntegrationTest {
         Show show = Show.builder().movie(movie).screen(screen).startTime(LocalDateTime.now()).build();
         showRepository.save(show);
         
-        // 4. Create Inventory manually
+        // 4. Create Inventory
         var showSeat = in.levyashvin.ticketbooking.modules.movie.model.ShowSeat.builder()
                 .show(show)
                 .seat(seat)
                 .status(in.levyashvin.ticketbooking.modules.movie.model.ShowSeatStatus.AVAILABLE)
                 .price(100.0)
                 .build();
-        showSeatRepository.save(showSeat);
+        var savedShowSeat = showSeatRepository.save(showSeat);
         
         showId = show.getId();
-        showSeatId = showSeat.getId();
+        showSeatId = savedShowSeat.getId();
     }
 
     @Test
@@ -94,7 +110,9 @@ public class BookingFlowTest extends BaseIntegrationTest {
             .post("/api/v1/bookings")
         .then()
             .statusCode(200)
+            // 2. Verify Data
             .body("status", equalTo("CONFIRMED"))
-            .body("totalAmount", equalTo(100.0f));
+            .body("totalAmount", equalTo(100.0f))
+            .body("theaterName", equalTo("Grand Cinema"));
     }
 }

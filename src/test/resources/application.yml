@@ -1,0 +1,12 @@
+logging:
+  level:
+    org.springframework.security: TRACE
+    org.springframework.web: DEBUG
+
+application:
+  security:
+    jwt:
+      # 1 day in ms
+      expiration: 86400000
+      # MUST MATCH the key used to sign the token
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970

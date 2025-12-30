@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class BaseIntegrationTest {
 
-    // Fresh Postgres container for testing
+    // Spin up a fresh Postgres container for testing
     @Container
     @SuppressWarnings("resource")
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -19,14 +19,18 @@ public abstract class BaseIntegrationTest {
             .withUsername("test")
             .withPassword("test");
 
-    // Making it use this ryuk container over localhost 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
+        // Connect to Test Container
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         
-        // No Redis/RabbitMQ just testing DB logic
+        // Hibernate creates tables
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.show-sql", () -> "true");
+
+        // Disable external services
         registry.add("spring.data.redis.host", () -> "localhost"); 
         registry.add("spring.rabbitmq.host", () -> "localhost");
     }
