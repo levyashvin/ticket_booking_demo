@@ -2,6 +2,7 @@ package in.levyashvin.ticketbooking.modules.booking.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -99,5 +100,27 @@ public class BookingService {
                 .totalAmount(savedBooking.getTotalAmount())
                 .status(savedBooking.getStatus())
                 .build();
+    }
+
+    public List<BookingResponse> getUserBookings(String userEmail) {
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Get bookings
+        List<Booking> bookings = bookingRepository.findByUserOrderByBookingTimeDesc(user);
+
+        // COnvert to dtos
+        return bookings.stream()
+                .map(booking -> BookingResponse.builder()
+                        .bookingId(booking.getId())
+                        .movieTitle(booking.getShow().getMovie().getTitle())
+                        .theaterName(booking.getShow().getScreen().getTheater().getName())
+                        .screenName(booking.getShow().getScreen().getName())
+                        .showTime(booking.getShow().getStartTime())
+                        .totalAmount(booking.getTotalAmount())
+                        .status(booking.getStatus())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
