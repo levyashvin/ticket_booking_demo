@@ -115,4 +115,55 @@ public class BookingFlowTest extends BaseIntegrationTest {
             .body("totalAmount", equalTo(100.0f))
             .body("theaterName", equalTo("Grand Cinema"));
     }
+
+    @Test
+    void shouldFailIfSeatAlreadyBooked() {
+        // First Booking (Success)
+        BookingRequest request1 = new BookingRequest();
+        request1.setShowId(showId);
+        request1.setShowSeatIds(Collections.singletonList(showSeatId));
+
+        given()
+            .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + userToken)
+            .body(request1)
+        .when()
+            .post("/api/v1/bookings")
+        .then()
+            .statusCode(200); // Success
+
+        // Second Booking Attempt (Same Seat -> Should Fail)
+        given()
+            .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + userToken)
+            .body(request1) // Trying to book same seat
+        .when()
+            .post("/api/v1/bookings")
+        .then()
+            .statusCode(400)
+            .body(org.hamcrest.Matchers.containsString("not available")); 
+    }
+
+    @Test
+    void shouldPreventNormalUserFromCreatingMovie() {
+        
+        String movieJson = """
+            {
+                "title": "Hacker Movie",
+                "genre": "Action",
+                "language": "English",
+                "durationMinutes": 120,
+                "releaseDate": "2025-01-01"
+            }
+        """;
+
+        given()
+            .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + userToken) // Normal User Token
+            .body(movieJson)
+        .when()
+            .post("/api/v1/movies") // Admin only endpoint
+        .then()
+            .statusCode(403); // Forbidden
+    }
 }
