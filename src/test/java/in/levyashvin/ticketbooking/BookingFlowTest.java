@@ -45,7 +45,7 @@ public class BookingFlowTest extends BaseIntegrationTest {
     @Autowired private TheaterRepository theaterRepository;
     
     @MockitoBean
-    private RabbitTemplate rabbitTemplate; // Mock RabbitMQ to avoid errors
+    private RabbitTemplate rabbitTemplate; // Mocking RabbitMQ to error
 
     private String userToken;
     private Long showId;
@@ -55,12 +55,12 @@ public class BookingFlowTest extends BaseIntegrationTest {
     void setUp() {
         RestAssured.port = port;
 
-        // 1. Create User & Get Token
+        // Create User & Get Token
         String uniqueEmail = "test" + System.currentTimeMillis() + "@test.com";
-        var authResponse = authService.register(new RegisterRequest("Test User", uniqueEmail, "pass123"));
+        var authResponse = authService.register(new RegisterRequest("Test User", uniqueEmail, "pass123", "USER"));
         userToken = authResponse.getToken();
 
-        // 2. Setup Full Venue Hierarchy (City -> Theater -> Screen)
+        // Full Venue Hierarchy (City -> Theater -> Screen)
         var city = cityRepository.save(in.levyashvin.ticketbooking.modules.venue.model.City.builder().name("Test City").build());
         
         var theater = theaterRepository.save(in.levyashvin.ticketbooking.modules.venue.model.Theater.builder()
@@ -79,11 +79,11 @@ public class BookingFlowTest extends BaseIntegrationTest {
 
         Movie movie = movieRepository.save(Movie.builder().title("Test Movie").releaseDate(LocalDate.now()).build());
 
-        // 3. Create Show
+        // Create Show
         Show show = Show.builder().movie(movie).screen(screen).startTime(LocalDateTime.now()).build();
         showRepository.save(show);
         
-        // 4. Create Inventory
+        // Create Inventory
         var showSeat = in.levyashvin.ticketbooking.modules.movie.model.ShowSeat.builder()
                 .show(show)
                 .seat(seat)
@@ -110,7 +110,7 @@ public class BookingFlowTest extends BaseIntegrationTest {
             .post("/api/v1/bookings")
         .then()
             .statusCode(200)
-            // 2. Verify Data
+            // Verify Data
             .body("status", equalTo("CONFIRMED"))
             .body("totalAmount", equalTo(100.0f))
             .body("theaterName", equalTo("Grand Cinema"));

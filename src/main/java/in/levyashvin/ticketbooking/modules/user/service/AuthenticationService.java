@@ -23,11 +23,17 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+
+        Role userRole = Role.USER;
+        if(request.getRole() != null && request.getRole().equalsIgnoreCase("ADMIN")) {
+            userRole = Role.ADMIN;
+        }
+
         var user = User.builder()
                     .name(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.USER)
+                    .role(userRole)
                     .build();
 
         repository.save(user);

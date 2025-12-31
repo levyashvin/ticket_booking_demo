@@ -51,16 +51,8 @@ docker-compose up -d
 
 ### 3. Run the Application
 
-**Mac/Linux:**
-
 ```bash
-./mvnw spring-boot:run
-```
-
-**Windows (PowerShell):**
-
-```powershell
-.\mvnw spring-boot:run
+mvnw spring-boot:run
 ```
 
 ---
