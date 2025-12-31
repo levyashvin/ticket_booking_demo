@@ -3,6 +3,7 @@ package in.levyashvin.ticketbooking.modules.booking.controller;
 import in.levyashvin.ticketbooking.modules.booking.dto.BookingRequest;
 import in.levyashvin.ticketbooking.modules.booking.dto.BookingResponse;
 import in.levyashvin.ticketbooking.modules.booking.service.BookingService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    @Operation(summary = "Adds new booking for the user and returns ok if valid")
     @PostMapping
     public ResponseEntity<BookingResponse> bookTickets(
             @RequestBody BookingRequest request,
@@ -31,6 +33,7 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.bookTickets(request, userDetails.getUsername()));
     }
 
+    @Operation(summary = "Returns list of bookings made for the current user")
     @GetMapping
     public ResponseEntity<List<BookingResponse>> getMyBookings(
             @AuthenticationPrincipal UserDetails userDetails
