@@ -2,6 +2,7 @@ package in.levyashvin.ticketbooking.modules.movie.controller;
 
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateMovieRequest;
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateShowRequest;
+import in.levyashvin.ticketbooking.modules.movie.dto.ShowResponse;
 import in.levyashvin.ticketbooking.modules.movie.dto.ShowSeatResponse;
 import in.levyashvin.ticketbooking.modules.movie.model.Movie;
 import in.levyashvin.ticketbooking.modules.movie.model.Show;
@@ -41,7 +42,7 @@ public class MovieController {
     }
 
     @GetMapping("/{movieId}/shows")
-    public ResponseEntity<List<Show>> getShows(@PathVariable Long movieId) {
+    public ResponseEntity<List<ShowResponse>> getShows(@PathVariable Long movieId) {
         return ResponseEntity.ok(movieService.getShowsByMovie(movieId));
     }
 

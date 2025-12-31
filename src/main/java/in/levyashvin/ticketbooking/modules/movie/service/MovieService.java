@@ -2,6 +2,7 @@ package in.levyashvin.ticketbooking.modules.movie.service;
 
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateMovieRequest;
 import in.levyashvin.ticketbooking.modules.movie.dto.CreateShowRequest;
+import in.levyashvin.ticketbooking.modules.movie.dto.ShowResponse;
 import in.levyashvin.ticketbooking.modules.movie.dto.ShowSeatResponse;
 import in.levyashvin.ticketbooking.modules.movie.model.Movie;
 import in.levyashvin.ticketbooking.modules.movie.model.Show;
@@ -94,10 +95,22 @@ public class MovieService {
     }
 
     @Cacheable(value = "shows", key = "#movieId")
-    public List<Show> getShowsByMovie(Long movieId) {
+    public List<ShowResponse> getShowsByMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        return showRepository.findByMovie(movie);
+        List<Show> shows = showRepository.findByMovie(movie);
+
+        return shows.stream()
+                .map(show -> ShowResponse.builder()
+                    .showId(show.getId())
+                    .startTime(show.getStartTime())
+                    .movieTitle(show.getMovie().getTitle())
+                    .screenName(show.getScreen().getName())
+                    .theaterName(show.getScreen().getTheater().getName())
+                    .theaterId(show.getScreen().getTheater().getId())
+                    .build())
+                .collect(Collectors.toList());
+                
     }
 
     public List<ShowSeatResponse> getShowSeats(Long showId) {
